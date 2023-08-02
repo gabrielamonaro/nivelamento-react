@@ -25,53 +25,19 @@ export const Content = styled.div`
         h1{
             margin-bottom: 24px;
         }
+            a{
+                color: #f4ede8;
+                display: block;
+                text-decoration: none;
+                transition: color 0.2s;
+                margin-top: 28px;
 
-        input{
-            background: #232129;
-            border-radius: 10px;
-            border: 2px solid #232129;
-            padding: 16px;
-            width: 100%;
-            margin-top: 8px; 
-
-            &::placeholder{
-                color: #F4EDE8; 
+              
             }
-
-            & + input { //todo input precedido por outro
-                margin-top: 8px; 
-            }
+        
         }
 
-        button{
-            background: #ff9000;
-            height: 56px;
-            border: 2px solid #232129;
-            padding: 0 16px;
-            color: #312e38;
-            font-weight: 500;
-            border-radius: 10px;
-            border: none;
-            width: 100%;
-            margin-top: 16px;
-            transition: background-color 0.2s;
-            
-            &:hover{
-                background: ${shade( 0.2, '#ff9000')}
-            }
-
-        a { 
-            color: #F4EDE8;
-            display: block;
-            margin-top: 24x;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        }
-    }
-
-    >a {        //pega somente as tags a que vem diretamente de dentro do container - filhos diretos
+        >a {    //pega somente as tags a que vem diretamente de dentro do container - filhos diretos
                 color: #ff9000;
                 display: block;
                 margin-top: 24x;
@@ -84,11 +50,11 @@ export const Content = styled.div`
                 &:hover{
                     color: ${shade( 0.2, '#ff9000')}
                 }
-    }
+            }
     `
 export const Background = styled.div`
     flex: 1;  //vai ocupar toda a tela, menos os 700px já ocupados
-    background: ${signInBackgroundImg} no-repeat center;
+    background: url(${signInBackgroundImg}) no-repeat center;
     background-size: cover;
 `
 
