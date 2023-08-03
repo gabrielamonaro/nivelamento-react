@@ -6,6 +6,7 @@ export const Container = styled.div`
     height: 100vh;
     display: flex;
     align-items: stretch; //os itens dentro de Container carregam height 100vh tambem
+    
 
 `
 export const Content = styled.div`

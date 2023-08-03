@@ -2,9 +2,8 @@ import React, {InputHTMLAttributes, useEffect, useRef, useState, useCallback} fr
 //useCallback é um hook do react - é uma forma de criar funcoes dentro de um compoennte que nao sao recriadas a cada vez que o componente atualiza - eles 
 
 import {IconBaseProps} from 'react-icons' //importando as propriedades que os ícones podem ter
-
-import { Container } from './styles'
-
+import {FiAlertCircle} from 'react-icons/fi'
+import { Container, Error } from './styles'
 import {useField} from '@unform/core' //é um hook que vai receber como parâmetro o nome do campo e retorna varias propriedades
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement>
@@ -44,15 +43,29 @@ const Input: React.FC<InputProps> = ({name,icon: Icon, ...rest}) => {
     }, [fieldName, registerField])
 
     return (
-        <Container isfocused={isFocused} isfield={isField}>
-            {Icon && <Icon size={20} />}
-            <input 
-                onFocus={()=> setIsFocused(true)} //qnd o input recebe o foco
-                onBlur={handleInputBlur} //qnd o input perde o foco
-                defaultValue={defaultValue}
-                ref={inputRef}  
-                {...rest}
-            />
+        <Container 
+            isErrored={!!error} //transformando a variavel erro em um boolean
+            isfocused={isFocused} 
+            isfield={isField}
+        >
+            <div>
+
+                {Icon && <Icon size={20} />}
+                <input 
+                    onFocus={()=> setIsFocused(true)} //qnd o input recebe o foco
+                    onBlur={handleInputBlur} //qnd o input perde o foco
+                    defaultValue={defaultValue}
+                    ref={inputRef}  
+                    {...rest}
+                />
+            </div>
+
+            {error && 
+                <Error title={error}>
+                     <FiAlertCircle color="#c53030" size={20}/>
+                </Error>
+               
+            }
         </Container>
     )
     

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useCallback, useRef} from 'react'
 import {Container, Background, Content} from './styles'
 
 import Input from '../../components/Input'
@@ -10,13 +10,42 @@ import {CgProfile} from 'react-icons/cg'
 import {BsArrowLeftShort} from 'react-icons/bs'
 
 import {Form} from '@unform/web'
+import {FormHandles} from '@unform/core'
+import * as Yup from 'yup' //biblioteca para lidar com validações de campos
+//podemos importar tudo e ir usando conforme a necessidade ou podemos importar cada módulo por vez
 
+import {ValidationError} from 'yup'
+import getValidationErrors from '../../utils/getValidationErrors'
 
 const SignUp: React.FC = () => {
+    const formRef = useRef<FormHandles>(null) //valor inicial é nulo
 
-    function handleSubmit(data: object): void{
-        console.log(data)
-    }
+    console.log(formRef)
+
+    const handleSubmit = useCallback(async(data: object) => {
+        try{
+            formRef.current?.setErrors({})
+            const schema = Yup.object().shape({
+                name: Yup.string().required('Nome obrigatório'),
+                email: Yup.string().required('Email obrigatório').email('Digite um e-mail válido'),
+                password: Yup.string().min(6, 'No mínimo 6 dígitos')
+            })
+            await schema.validate(data, {
+                abortEarly: false //usamos para poder mostrar no console os erros separados de cada um
+            }) //método .validate() vem junto com o Yup quando setamos schema = Yup.object()
+
+        }
+        catch(err)
+        {
+            let errors
+            if (err instanceof ValidationError){
+
+                console.log(err)
+                errors = getValidationErrors(err)
+                formRef.current?.setErrors(errors)
+            }
+        }
+    }, [])
 
     return ( <Container>
         <Background/>
@@ -25,7 +54,7 @@ const SignUp: React.FC = () => {
     <img src={logoImg} alt="Logo GoBarber" />
 
     {/* usamos a tag Form da biblioteca Unform */}
-    <Form onSubmit={handleSubmit}> 
+    <Form onSubmit={handleSubmit} ref={formRef}> 
         <h1>Faça seu cadastro</h1>
         <Input icon={CgProfile} name="name" type="text" placeholder='Nome' />
         <Input icon={FiMail} name="email" type="text" placeholder='email' />
