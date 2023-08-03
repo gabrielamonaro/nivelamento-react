@@ -1,4 +1,5 @@
-import React, {useRef, useCallback} from 'react'
+import React, {useRef, useCallback, useContext} from 'react'
+//useContext é um hook que vai pegar as informaçoes do contexto
 import {Container, Background, Content} from './styles'
 
 import Input from '../../components/Input'
@@ -10,26 +11,34 @@ import logoImg from '../../assets/Logo.svg'
 import { FiLogIn, FiMail, FiLock} from 'react-icons/fi'
 import { FormHandles } from '@unform/core'
 
+import {AuthProvider, useAuth} from '../../hooks/AuthContext'
+
 import getValidationErrors from '../../utils/getValidationErrors'
 
+interface SignInFormdata{
+    email: string
+    password: string
+}
 
 const SignIn: React.FC = () => {
     const formRef = useRef<FormHandles>(null) //valor inicial é nulo
+    
+    const{signIn} = useAuth()
 
-    console.log(formRef)
-
-    const handleSubmit = useCallback(async(data: object) => {
+    const handleSubmit = useCallback(async(data: SignInFormdata) => {
         try{
             formRef.current?.setErrors({})
             const schema = Yup.object().shape({
-                name: Yup.string().required('Nome obrigatório'),
                 email: Yup.string().required('Email obrigatório').email('Digite um e-mail válido'),
                 password: Yup.string().min(6, 'Senha obrigatória')
             })
             await schema.validate(data, {
                 abortEarly: false //usamos para poder mostrar no console os erros separados de cada um
             }) //método .validate() vem junto com o Yup quando setamos schema = Yup.object()
-
+            signIn({
+                email: data.email,
+                password: data.password
+            })
         }
         catch(err)
         {
@@ -41,7 +50,7 @@ const SignIn: React.FC = () => {
                 formRef.current?.setErrors(errors)
             }
         }
-    }, [])
+    }, [signIn]) //toda variavel externa que utilizamos no useCallBack e useEffect precisamos colocar como dependencias no final
     
     return(
         <Container>
