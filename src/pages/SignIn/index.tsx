@@ -1,4 +1,4 @@
-import React, {useRef, useCallback, useContext} from 'react'
+import React, {useRef, useCallback} from 'react'
 //useContext é um hook que vai pegar as informaçoes do contexto
 import {Container, Background, Content} from './styles'
 
@@ -11,9 +11,10 @@ import logoImg from '../../assets/Logo.svg'
 import { FiLogIn, FiMail, FiLock} from 'react-icons/fi'
 import { FormHandles } from '@unform/core'
 
-import {AuthProvider, useAuth} from '../../hooks/AuthContext'
+import {useAuth} from '../../hooks/Auth'
 
 import getValidationErrors from '../../utils/getValidationErrors'
+import { useToast } from '../../hooks/Toast'
 
 interface SignInFormdata{
     email: string
@@ -23,8 +24,10 @@ interface SignInFormdata{
 const SignIn: React.FC = () => {
     const formRef = useRef<FormHandles>(null) //valor inicial é nulo
     
-    const{signIn} = useAuth()
-
+    const{signIn, user} = useAuth()
+    console.log(user)
+    const {addToast} = useToast()
+    
     const handleSubmit = useCallback(async(data: SignInFormdata) => {
         try{
             formRef.current?.setErrors({})
@@ -32,25 +35,40 @@ const SignIn: React.FC = () => {
                 email: Yup.string().required('Email obrigatório').email('Digite um e-mail válido'),
                 password: Yup.string().min(6, 'Senha obrigatória')
             })
-            await schema.validate(data, {
+            await schema.validate(data, {   //método .validate() vem junto com o Yup quando setamos schema = Yup.object()
                 abortEarly: false //usamos para poder mostrar no console os erros separados de cada um
-            }) //método .validate() vem junto com o Yup quando setamos schema = Yup.object()
-            signIn({
+            }) 
+            await signIn({
                 email: data.email,
                 password: data.password
             })
+
+            await addToast({
+                type: 'success',
+                title: 'Login realizado com sucesso'
+            })
+     
+
         }
         catch(err)
         {
-            let errors
+           
             if (err instanceof Yup.ValidationError){
-
-                console.log(err)
-                errors = getValidationErrors(err)
+              
+                const errors = getValidationErrors(err)
                 formRef.current?.setErrors(errors)
+                return
             }
+            
+            //disparar um toast
+            addToast({
+                type: 'error',
+                title: 'Erro na autenticação',
+                description: 'Ocorrou um erro ao fazer o login, cheque as credenciais',
+            })
+            return
         }
-    }, [signIn]) //toda variavel externa que utilizamos no useCallBack e useEffect precisamos colocar como dependencias no final
+    }, [signIn, addToast]) //toda variavel externa que utilizamos no useCallBack e useEffect precisamos colocar como dependencias no final
     
     return(
         <Container>
