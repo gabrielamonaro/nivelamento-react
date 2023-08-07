@@ -5,16 +5,22 @@ interface SignInCredentials{
     email: string
     password: string
 }
+interface User{
+    id: string
+    avatar_url: string
+    name: string
+}
 
 interface AuthContextData{
-    user: object
+    user: User
     signIn(credentials: SignInCredentials):Promise<void>
     signOut():void
 }
 
+
 interface AuthState {
     token: string
-    user: object
+    user: User
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData) //iniciando o contexto com objeto vazio - forçando o parâmetro a ser vazio
@@ -28,8 +34,13 @@ const AuthProvider: React.FC<{children: React.ReactNode}>= ({children}) => {
 
         if (token && user)
         {
+            api.defaults.headers.common['authorization'] = `Bearer ${token}`; //passando o token como parametro em todas as rotas
+
             return {token, user: JSON.parse(user)}
         }
+
+
+
         return {} as AuthState
     }) 
 
@@ -45,6 +56,9 @@ const AuthProvider: React.FC<{children: React.ReactNode}>= ({children}) => {
 
         localStorage.setItem('@GoBarber:token', token)
         localStorage.setItem('@GoBarber:user', JSON.stringify(user))
+
+        api.defaults.headers.common['authorization'] = `Bearer ${token}`; //passando o token como parametro em todas as rotas
+
 
         setData({token, user})
 

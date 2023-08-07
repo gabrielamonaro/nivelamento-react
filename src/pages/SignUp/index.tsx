@@ -1,5 +1,5 @@
 import React, {useCallback, useRef} from 'react'
-import {Container, Background, Content} from './styles'
+import {Container, Background, Content, AnimationContainer} from './styles'
 
 import Input from '../../components/Input'
 import Button from '../../components/Button'
@@ -16,9 +16,21 @@ import * as Yup from 'yup' //biblioteca para lidar com validações de campos
 
 import {ValidationError} from 'yup'
 import getValidationErrors from '../../utils/getValidationErrors'
+import { Link, useHistory } from 'react-router-dom' //importamos o useHistory para fazer redirecionamentos
 
+import api from '../../services/api'
+import { useToast } from '../../hooks/Toast'
+
+interface SignUpFormData{
+    name: string
+    email: string
+    password: string
+}
 const SignUp: React.FC = () => {
     const formRef = useRef<FormHandles>(null) //valor inicial é nulo
+    const {addToast} = useToast()
+
+    const history = useHistory()
 
     console.log(formRef)
 
@@ -33,25 +45,41 @@ const SignUp: React.FC = () => {
             await schema.validate(data, {
                 abortEarly: false //usamos para poder mostrar no console os erros separados de cada um
             }) //método .validate() vem junto com o Yup quando setamos schema = Yup.object()
-
+            await api.post('/users', data) //cadastrando de fato pela rota
+            
+            history.push('/') //redirecionando para o login
+            
+            console.log(history)
+            addToast({
+                type: 'success',
+                title: 'Cadastro realizado',
+                description: 'Você já pode fazer o login no GoBarber'
+            })
         }
         catch(err)
         {
-            let errors
             if (err instanceof ValidationError){
-
                 console.log(err)
-                errors = getValidationErrors(err)
+                const errors = getValidationErrors(err)
                 formRef.current?.setErrors(errors)
+
+                return
             }
+
+            addToast({
+                type: 'success',
+                title: 'Erro no cadastro.',
+                description: 'Ocorreu um erro ao fazer o cadastro, tente novamente.'
+            })
         }
-    }, [])
+    }, [addToast, history])
 
     return ( <Container>
         <Background/>
 
 <Content>
-    <img src={logoImg} alt="Logo GoBarber" />
+    <AnimationContainer>
+        <img src={logoImg} alt="Logo GoBarber" />
 
     {/* usamos a tag Form da biblioteca Unform */}
     <Form onSubmit={handleSubmit} ref={formRef}> 
@@ -63,10 +91,12 @@ const SignUp: React.FC = () => {
         <Button type="submit"> Cadastrar </Button>
     </Form>
 
-    <a href="login">
+    <Link to="/">
         <BsArrowLeftShort/>
         Voltar para Logon
-    </a>
+    </Link>
+    </AnimationContainer>
+   
 
 </Content>
 </Container>)
